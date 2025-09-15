@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GaliBusiness - Gestion Avicole</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+</head>
+<body>
+    <div class="main-wrapper">
+        <nav class="sidebar" aria-label="Menu principal">
+            <div class="sidebar-header">
+                <img src="https://via.placeholder.com/40/FFD700/000000?text=G" alt="Logo de GaliBusiness" class="sidebar-logo">
+                <h3>GaliBusiness</h3>
+            </div>
+            <ul>
+                <li><a href="#" data-section-id="dashboard-section" class="active"><i class="fas fa-home" aria-hidden="true"></i> Tableau de Bord</a></li>
+                <li><a href="#" data-section-id="achat-produits-section"><i class="fas fa-shopping-cart" aria-hidden="true"></i> Achat des Produits</a></li>
+                <li><a href="#" data-section-id="production-section"><i class="fas fa-egg" aria-hidden="true"></i> Production</a></li>
+                <li><a href="#" data-section-id="vente-section"><i class="fas fa-cash-register" aria-hidden="true"></i> Vente</a></li>
+                <li><a href="#" data-section-id="bilan-section"><i class="fas fa-balance-scale" aria-hidden="true"></i> Bilan Standard</a></li>
+                <li><a href="#" data-section-id="gestion-marchandise-section"><i class="fas fa-boxes" aria-hidden="true"></i> Gestion des Marchandises</a></li>
+                <li><a href="#" data-section-id="charts-section"><i class="fas fa-chart-bar" aria-hidden="true"></i> Graphiques Avancés</a></li>
+            </ul>
+            <div class="sidebar-footer" role="contentinfo">
+                <p>&copy; 2025 GaliBusiness</p>
+            </div>
+        </nav>
+
+        <div class="content-area" role="main">
+            <header class="app-header-top" aria-label="En-tête de l'application">
+                <div class="header-info">
+                    <p>Date et Heure Actuelles : <strong id="currentDateTime"></strong></p>
+                    <div class="technician-input-group">
+                        <label for="technicianNameInput">Technicien :</label>
+                        <input type="text" id="technicianNameInput" placeholder="Nom du technicien" required>
+                    </div>
+                </div>
+            </header>
+
+            <div id="notification-area" class="notification-area" role="alert" aria-live="polite"></div>
+
+            <section class="app-section active-section" id="dashboard-section" aria-labelledby="dashboard-heading">
+                <h2 id="dashboard-heading"><i class="fas fa-home"></i> Tableau de Bord</h2>
+                <div class="dashboard-widgets">
+                    <div class="widget">
+                        <h3>Total Achats</h3>
+                        <p id="totalAchatsCount">0</p>
+                    </div>
+                    <div class="widget">
+                        <h3>Total Production</h3>
+                        <p id="totalProductionCount">0</p>
+                    </div>
+                    <div class="widget">
+                        <h3>Total Ventes</h3>
+                        <p id="totalVentesCount">0</p>
+                    </div>
+                    <div class="widget">
+                        <h3>Bénéfice Total</h3>
+                        <p id="totalBeneficeCount">0</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="app-section" id="achat-produits-section" aria-labelledby="achat-heading">
+                <h2 id="achat-heading"><i class="fas fa-shopping-cart"></i> 1. Achat des Produits</h2>
+                <form id="formAchat" class="data-form vertical-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="achatNumeroRapport">N° Rapport :</label>
+                            <input type="text" id="achatNumeroRapport" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="achatMarchandise">Type de Marchandise :</label>
+                            <select id="achatMarchandise" required>
+                                <option value="">Sélectionner une marchandise</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="achatQuantite">Quantité Achetée :</label>
+                            <input type="number" id="achatQuantite" min="0" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="achatMontant">Montant (CFA) :</label>
+                            <input type="number" id="achatMontant" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="achatDate">Date :</label>
+                            <input type="date" id="achatDate" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-button small-button"><i class="fas fa-save" aria-hidden="true"></i> Enregistrer Achat</button>
+                </form>
+
+                <div class="data-table-container">
+                    <div class="table-header-controls">
+                        <h3>Historique des Achats</h3>
+                        <button class="print-button" data-table-id="tableAchat"><i class="fas fa-print"></i> Imprimer</button>
+                    </div>
+                    <table id="tableAchat" class="data-table">
+                        <caption>Historique des achats de produits</caption>
+                        <thead>
+                            <tr>
+                                <th>N° Rapport</th>
+                                <th>Type de Marchandise</th>
+                                <th>Quantité Achetée</th>
+                                <th>Montant</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="app-section" id="production-section" aria-labelledby="production-heading">
+                <h2 id="production-heading"><i class="fas fa-egg"></i> 2. Production</h2>
+                <form id="formProduction" class="data-form vertical-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productionNumeroRapport">N° Rapport :</label>
+                            <input type="text" id="productionNumeroRapport" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="productionMarchandise">Type de Marchandise :</label>
+                            <select id="productionMarchandise" required>
+                                <option value="">Sélectionner une marchandise</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="productionDate">Date :</label>
+                            <input type="date" id="productionDate" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="productionQuantite">Quantité Produite :</label>
+                            <input type="number" id="productionQuantite" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productionPrixUnitaire">Prix Unitaire (CFA) :</label>
+                            <input type="number" id="productionPrixUnitaire" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="productionMontant">Montant (automatique) :</label>
+                            <input type="text" id="productionMontant" readonly>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-button small-button"><i class="fas fa-save" aria-hidden="true"></i> Enregistrer Production</button>
+                </form>
+
+                <div class="data-table-container">
+                    <div class="table-header-controls">
+                        <h3>Historique de la Production</h3>
+                        <button class="print-button" data-table-id="tableProduction"><i class="fas fa-print"></i> Imprimer</button>
+                    </div>
+                    <table id="tableProduction" class="data-table">
+                        <caption>Historique de la production de la ferme</caption>
+                        <thead>
+                            <tr>
+                                <th>N° Rapport</th>
+                                <th>Type de Marchandise</th>
+                                <th>Date</th>
+                                <th>Quantité Produite</th>
+                                <th>Prix Unitaire</th>
+                                <th>Montant</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="app-section" id="vente-section" aria-labelledby="vente-heading">
+                <h2 id="vente-heading"><i class="fas fa-cash-register"></i> 3. Vente</h2>
+                <form id="formVente" class="data-form vertical-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="venteNumeroRapport">N° Rapport :</label>
+                            <input type="text" id="venteNumeroRapport" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="venteMarchandise">Type de Marchandise :</label>
+                            <select id="venteMarchandise" required>
+                                <option value="">Sélectionner une marchandise</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="venteDate">Date :</label>
+                            <input type="date" id="venteDate" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="venteQuantite">Quantité Vendue :</label>
+                            <input type="number" id="venteQuantite" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="ventePrixUnitaire">Prix Unitaire (CFA) :</label>
+                            <input type="number" id="ventePrixUnitaire" min="0" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="venteMontant">Montant (automatique) :</label>
+                            <input type="text" id="venteMontant" readonly>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-button small-button"><i class="fas fa-save" aria-hidden="true"></i> Enregistrer Vente</button>
+                </form>
+
+                <div class="data-table-container">
+                    <div class="table-header-controls">
+                        <h3>Historique des Ventes</h3>
+                        <button class="print-button" data-table-id="tableVente"><i class="fas fa-print"></i> Imprimer</button>
+                    </div>
+                    <table id="tableVente" class="data-table">
+                        <caption>Historique des ventes de la ferme</caption>
+                        <thead>
+                            <tr>
+                                <th>N° Rapport</th>
+                                <th>Type de Marchandise</th>
+                                <th>Date</th>
+                                <th>Quantité Vendue</th>
+                                <th>Prix Unitaire</th>
+                                <th>Montant</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="app-section" id="bilan-section" aria-labelledby="bilan-heading">
+                <h2 id="bilan-heading"><i class="fas fa-balance-scale"></i> 4. Bilan Standard</h2>
+                <form id="formBilan" class="data-form vertical-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="bilanMois">Mois :</label>
+                            <select id="bilanMois" required>
+                                <option value="">Sélectionner</option>
+                                <option value="janvier">Janvier</option>
+                                <option value="fevrier">Février</option>
+                                <option value="mars">Mars</option>
+                                <option value="avril">Avril</option>
+                                <option value="mai">Mai</option>
+                                <option value="juin">Juin</option>
+                                <option value="juillet">Juillet</option>
+                                <option value="aout">Août</option>
+                                <option value="septembre">Septembre</option>
+                                <option value="octobre">Octobre</option>
+                                <option value="novembre">Novembre</option>
+                                <option value="decembre">Décembre</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="bilanAnnee">Année :</label>
+                            <input type="number" id="bilanAnnee" min="2020" max="2100" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="bilanTypeMarchandise">Type de Marchandise :</label>
+                            <select id="bilanTypeMarchandise" required>
+                                <option value="">Sélectionner une marchandise</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-button small-button" id="btnGenererBilan"><i class="fas fa-file-invoice" aria-hidden="true"></i> Générer Bilan</button>
+                    <button type="button" class="print-button small-button" id="btnPrintBilan"><i class="fas fa-print"></i> Imprimer le Bilan</button>
+                </form>
+
+                <div id="bilanResultats" class="bilan-resultats" style="display: none;">
+                    <div class="bilan-header">
+                        <h3>Bilan Standard</h3>
+                        <p><strong>Période :</strong> <span id="bilanMoisAnnee"></span></p>
+                        <p><strong>Date de génération :</strong> <span id="bilanDateHeure"></span></p>
+                        <p><strong>Technicien :</strong> <span id="bilanTechnicien"></span></p>
+                    </div>
+                    <div class="bilan-summary">
+                        <div class="bilan-item">
+                            <h4>Total des Ventes</h4>
+                            <p id="totalVentesBilan">0 CFA</p>
+                        </div>
+                        <div class="bilan-item">
+                            <h4>Total des Achats</h4>
+                            <p id="totalAchatsBilan">0 CFA</p>
+                        </div>
+                        <div class="bilan-item">
+                            <h4>Bénéfice Réel</h4>
+                            <p id="beneficeReelBilan">0 CFA</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bilan-summary">
+                        <div class="bilan-item">
+                            <h4>Quantité Produite</h4>
+                            <p id="totalProductionBilan">0</p>
+                        </div>
+                        <div class="bilan-item">
+                            <h4>Quantité Achetée</h4>
+                            <p id="quantiteAcheteeBilan">0</p>
+                        </div>
+                        <div class="bilan-item">
+                            <h4>Quantité Vendue</h4>
+                            <p id="quantiteVendueBilan">0</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <section class="app-section" id="gestion-marchandise-section" aria-labelledby="marchandise-heading">
+                <h2 id="marchandise-heading"><i class="fas fa-boxes"></i> 5. Gestion des Marchandises</h2>
+                <form id="formMarchandise" class="data-form vertical-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="marchandiseNom">Marchandise :</label>
+                            <input type="text" id="marchandiseNom" placeholder="ex: Poussins, Aliment, Vaccin" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="marchandiseDate">Date :</label>
+                            <input type="date" id="marchandiseDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="marchandiseFournisseur">Fournisseur :</label>
+                            <input type="text" id="marchandiseFournisseur" required>
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="marchandiseTel">Téléphone :</label>
+                            <input type="tel" id="marchandiseTel" placeholder="ex: +225 07 00 00 00 00" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="marchandiseType">Type de Marchandise :</label>
+                            <input type="text" id="marchandiseType" placeholder="ex: Aliment de démarrage, Vaccin" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="submit-button small-button"><i class="fas fa-save" aria-hidden="true"></i> Enregistrer la Marchandise</button>
+                </form>
+
+                <div class="data-table-container">
+                    <div class="table-header-controls">
+                        <h3>Historique des Marchandises</h3>
+                        <button class="print-button" data-table-id="tableMarchandise"><i class="fas fa-print"></i> Imprimer</button>
+                    </div>
+                    <table id="tableMarchandise" class="data-table">
+                        <caption>Historique des informations sur les marchandises et les fournisseurs</caption>
+                        <thead>
+                            <tr>
+                                <th>Marchandise</th>
+                                <th>Date</th>
+                                <th>Fournisseur</th>
+                                <th>Téléphone</th>
+                                <th>Type de Marchandise</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="app-section" id="charts-section" aria-labelledby="charts-heading">
+                <h2 id="charts-heading"><i class="fas fa-chart-bar" aria-hidden="true"></i> Graphiques Avancés</h2>
+
+                <div class="charts-grid">
+                    <div class="chart-container">
+                        <h3>Tendances d'Achats et de Ventes (par Mois)</h3>
+                        <canvas id="achatVenteChart" class="chart-canvas"></canvas>
+                        <p class="chart-info">Ce graphique linéaire compare les montants totaux des achats et des ventes par mois pour une vue d'ensemble de la performance financière.</p>
+                    </div>
+
+                    <div class="chart-container">
+                        <h3>Répartition des Dépenses (par Type de Marchandise)</h3>
+                        <canvas id="repartitionAchatsChart" class="chart-canvas"></canvas>
+                        <p class="chart-info">Ce graphique en secteurs montre la part de chaque type de marchandise dans les dépenses totales, permettant d'identifier les coûts les plus importants.</p>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <h3>Productivité par Mois</h3>
+                        <canvas id="productionChart" class="chart-canvas"></canvas>
+                        <p class="chart-info">Ce graphique en barres illustre la quantité totale de produits produits chaque mois pour évaluer la productivité de la ferme.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
